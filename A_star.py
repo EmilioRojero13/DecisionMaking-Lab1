@@ -15,7 +15,7 @@ class Node():
         return self.position == other.position
 
 
-def astar(maze, start, end):
+def astar(maze, start, end, DEBUG=False):
     """Returns a list of tuples as a path from the given start to the given end in the given maze"""
 
     # Create start and end node
@@ -52,7 +52,8 @@ def astar(maze, start, end):
         closed_list.append(current_node)
 
         # Print the current node and its f, g, h
-        print(f"\nExpanding Node: {current_node.position}, f={current_node.f}, g={current_node.g}, h={current_node.h}")
+        if DEBUG:
+            print(f"\nExpanding Node: {current_node.position}, f={current_node.f}, g={current_node.g}, h={current_node.h}")
         nodes_created += 1
 
         # Found the goal
@@ -63,18 +64,18 @@ def astar(maze, start, end):
             while current is not None:
                 path.append(current.position)
                 current = current.parent
-            # Stop measuring runtime and calculate elapsed time
+            
             end_time = time.time()
-            runtime = (end_time - start_time) * 1000  # Convert to milliseconds
-            print("\nTotal cost:", cost)
+            runtime = (end_time - start_time) * 1000  
+            print("Total cost:", cost)
             print("Path:", path[::-1])
             print("Nodes created:", nodes_created)
             print(f"Runtime: {runtime:.2f} ms")
-            return path[::-1]  # Return reversed path
+            return path[::-1]  
 
         # Generate children
         children = []
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]:  # Adjacent squares
+        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]:  
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
@@ -103,7 +104,8 @@ def astar(maze, start, end):
             child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
             child.f = child.g + child.h
 
-            print(f"Child Node: {child.position}, g={child.g}, h={child.h}, f={child.f}")
+            if DEBUG:
+                print(f"Child Node: {child.position}, g={child.g}, h={child.h}, f={child.f}")
 
             # Child is already in the open list
             for open_node in open_list:
@@ -118,10 +120,9 @@ def astar(maze, start, end):
                 open_list.append(child)
 
 
-    # If the open list is empty and no path is found, print -1
     end_time = time.time()
-    runtime = (end_time - start_time) * 1000  # Convert to milliseconds
-    print("\nNo path found.")
+    runtime = (end_time - start_time) * 1000 
+    print("No path found.")
     print(f"Nodes created: {nodes_created}")
     print(f"Runtime: {runtime:.2f} ms")
     print("Total cost: -1")
@@ -171,9 +172,51 @@ def main():
     start3 = (8, 8)
     end3 = (1, 2)
 
-    # path = astar(maze1, start1, end1)
-    path = astar(maze2, start2, end2)
-    # path = astar(maze3, start3, end3)
+    # Test Case 4
+    maze4 = [
+        [1, 3, 2, 1, 4],
+        [2, 0, 3, 5, 1],
+        [3, 2, 1, 0, 2],
+        [4, 1, 2, 3, 4],
+        [1, 5, 3, 2, 1]
+    ]
+    start4 = (0, 0)
+    end4 = (4, 4)
+
+    # Test Case 5
+    maze5 = [
+        [1, 0, 2, 1, 4],
+        [0, 0, 3, 5, 1],
+        [3, 2, 1, 0, 2],
+        [4, 1, 2, 3, 4],
+        [1, 5, 3, 2, 1]
+    ]
+    start5 = (0, 0)
+    end5 = (4, 4)
+
+    # Test Case 6
+    maze6 = [
+        [1, 1, 1, 0, 4],
+        [0, 0, 1, 0, 1],
+        [3, 2, 1, 0, 2],
+        [4, 0, 0, 3, 4],
+        [1, 5, 3, 2, 1]
+    ]
+    start6 = (0, 0)
+    end6 = (4, 4)
+
+    print("\nMaze 1")
+    path = astar(maze1, start1, end1, DEBUG=False)
+    print("\nMaze 2")
+    path = astar(maze2, start2, end2, DEBUG=False)
+    print("\nMaze 3")
+    path = astar(maze3, start3, end3, DEBUG=False)
+    print("\nMaze 4")
+    path = astar(maze4, start4, end4, DEBUG=False)
+    print("\nMaze 5")
+    path = astar(maze5, start5, end5, DEBUG=False)
+    print("\nMaze 6")
+    path = astar(maze6, start6, end6, DEBUG=False)
 
 
 if __name__ == '__main__':
