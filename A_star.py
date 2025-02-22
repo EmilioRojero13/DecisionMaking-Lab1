@@ -131,6 +131,8 @@ def astar(maze, start, end, DEBUG=False):
 
 def manhattan_distance(node, goal):
     return abs(goal.position[0] - node.position[0]) + abs(goal.position[1] - node.position[1])
+def all_zeros(node, goal):
+    return 0
 
 def main():
 
