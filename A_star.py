@@ -101,7 +101,7 @@ def astar(maze, start, end, DEBUG=False):
 
             # Create the f, g, and h values
             child.g = current_node.g + maze[child.position[0]][child.position[1]]
-            child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
+            child.h = manhattan_distance(current_node, end_node)
             child.f = child.g + child.h
 
             if DEBUG:
@@ -129,6 +129,8 @@ def astar(maze, start, end, DEBUG=False):
     print("Path: NULL")
     return []
 
+def manhattan_distance(node, goal):
+    return abs(goal.position[0] - node.position[0]) + abs(goal.position[1] - node.position[1])
 
 def main():
 
