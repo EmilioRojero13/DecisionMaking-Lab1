@@ -55,7 +55,6 @@ def astar(maze, start, end, heuristic, DEBUG=False):
         # Print the current node and its f, g, h
         if DEBUG:
             print(f"\nExpanding Node: {current_node.position}, f={current_node.f}, g={current_node.g}, h={current_node.h}")
-        #nodes_created += 1
 
         # Found the goal
         if current_node == end_node:
@@ -149,11 +148,6 @@ def manhattan_distance_error(node, goal):
     #we start from 0, because we cant have negative cost
     return max(0,final_distance)
 
-def modified_manhattan_distance(node, goal):
-    power=1.2
-    return abs(node.position[0] - goal.position[0]) ** power + abs(node.position[1] - goal.position[1]) ** power
-
-
 def modified_manhattan_distance2(node, goal, maze):
     # Created a heirustic to consider the number of obstacles between points
     distance = manhattan_distance(node,goal)
@@ -231,9 +225,7 @@ def main(test_case_number, heuristic_fucntion):
         1: manhattan_distance,
         2: all_zeros,
         3: manhattan_distance_error,
-        4: modified_manhattan_distance,
-        5: modified_manhattan_distance2
-
+        4: modified_manhattan_distance2
     }
 
     astar(test_cases[test_case_number][0], test_cases[test_case_number][1], test_cases[test_case_number][2], heuristic_fucntions[heuristic_fucntion], DEBUG=False)
@@ -252,17 +244,15 @@ if __name__ == '__main__':
 
     if choice == 7:
         for test_case in range(1, 7):  
-            for heuristic in [1,2,3,4,5]:   
+            for heuristic in [1,2,3,4]:   
                 main(test_case, heuristic)
-                print(heuristic)
                 print("\n")
 
     else:
         while True:
             try:
-                heuristic_function = input("Enter heuristic function (1 for manhattan_distance, 2 for all_zeros, 3 for manhattan_distance_error): ")
-
-                if 1 <= heuristic_function <= 3:
+                heuristic_function = int(input("Enter heuristic function (1 for Manhattan distance, 2 for all_zeros, 3 for Manhattan distance error, 4 for Modifed manhattan distance): "))
+                if 1 <= heuristic_function <= 4:
                     main(choice, heuristic_function)
                     break
                 else:
