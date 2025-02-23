@@ -1,5 +1,6 @@
 import random
 import time
+import argparse
  
 class Node():
     """A node class for A* Pathfinding"""
@@ -230,32 +231,28 @@ def main(test_case_number, heuristic_fucntion):
 
     astar(test_cases[test_case_number][0], test_cases[test_case_number][1], test_cases[test_case_number][2], heuristic_fucntions[heuristic_fucntion], DEBUG=False)
 
-if __name__ == '__main__':
-    while True:
-        try:
-            choice = int(input("Select a test case (1 - 6) or 7 to print all test cases with both heuristics: "))
-            
-            if 1 <= choice <= 7:
-                break
-            else:
-                print("Not a valid value. Please enter a number between 1 and 7.")
-        except ValueError:
-            print("Invalid input. Please enter a valid integer.")
 
-    if choice == 7:
-        for test_case in range(1, 7):  
-            for heuristic in [1,2,3,4]:   
-                main(test_case, heuristic)
-                print("\n")
-
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run test cases with heuristics.")
+    parser.add_argument("test_case", type=int, help="Select a test case (1-6) or 7 to print all test cases with all heuristics.")
+    parser.add_argument("heuristic", type=int, nargs="?", default=None, help="Enter heuristic function (1-5). Required unless test_case is 7.")
+    
+    args = parser.parse_args()
+    
+    if not (1 <= args.test_case <= 7):
+        print("Error: test_case must be between 1 and 7.")
+        exit(1)
+    if not (1 <= args.heuristic <= 4):
+        print("Error: heuristic must be between 1 and 4.")
+        exit(1)
+    
+    if args.test_case == 7:
+        for test_case in range(1, 7):     
+            main(test_case, args.heuristic)
+            print("\n")
     else:
-        while True:
-            try:
-                heuristic_function = int(input("Enter heuristic function (1 for Manhattan distance, 2 for all_zeros, 3 for Manhattan distance error, 4 for Modifed manhattan distance): "))
-                if 1 <= heuristic_function <= 4:
-                    main(choice, heuristic_function)
-                    break
-                else:
-                    print("Not a valid heuristic function. Please enter 1 or 2.")
-            except ValueError:
-                print("Invalid input. Please enter 1 or 2.")
+        if args.heuristic is None or not (1 <= args.heuristic <= 4):
+            print("Error: heuristic must be between 1 and 5 when test_case is not 7.")
+            exit(1)
+        
+        main(args.test_case, args.heuristic)
