@@ -1,5 +1,6 @@
+import random
 import time
-
+ 
 class Node():
     """A node class for A* Pathfinding"""
 
@@ -15,7 +16,7 @@ class Node():
         return self.position == other.position
 
 
-def astar(maze, start, end, DEBUG=False):
+def astar(maze, start, end, heuristic, DEBUG=False):
     """Returns a list of tuples as a path from the given start to the given end in the given maze"""
 
     # Create start and end node
@@ -54,7 +55,7 @@ def astar(maze, start, end, DEBUG=False):
         # Print the current node and its f, g, h
         if DEBUG:
             print(f"\nExpanding Node: {current_node.position}, f={current_node.f}, g={current_node.g}, h={current_node.h}")
-        nodes_created += 1
+        #nodes_created += 1
 
         # Found the goal
         if current_node == end_node:
@@ -71,7 +72,7 @@ def astar(maze, start, end, DEBUG=False):
             print("Path:", path[::-1])
             print("Nodes created:", nodes_created)
             print(f"Runtime: {runtime:.2f} ms")
-            return path[::-1]  
+            return path[::-1]
 
         # Generate children
         children = []
@@ -89,6 +90,7 @@ def astar(maze, start, end, DEBUG=False):
 
             # Create new node
             new_node = Node(current_node, node_position)
+            nodes_created += 1
 
             # Append
             children.append(new_node)
@@ -101,7 +103,11 @@ def astar(maze, start, end, DEBUG=False):
 
             # Create the f, g, and h values
             child.g = current_node.g + maze[child.position[0]][child.position[1]]
-            child.h = manhattan_distance(current_node, end_node)
+
+            if heuristic ==  modified_manhattan_distance2:
+                child.h = heuristic(child, end_node, maze)
+            else:
+                child.h = heuristic(child, end_node)
             child.f = child.g + child.h
 
             if DEBUG:
@@ -131,97 +137,135 @@ def astar(maze, start, end, DEBUG=False):
 
 def manhattan_distance(node, goal):
     return abs(goal.position[0] - node.position[0]) + abs(goal.position[1] - node.position[1])
+
 def all_zeros(node, goal):
     return 0
 
-def main():
+def manhattan_distance_error(node, goal):
+    distance = manhattan_distance(node, goal)
+    #add errors from -3 to +3, excluding 0
+    error = random.choice([-3, -2, -1, 1, 2, 3])
+    final_distance = distance + error
+    #we start from 0, because we cant have negative cost
+    return max(0,final_distance)
 
-    # Test Case 1
-    maze1 = [
-        [2, 4, 2, 1, 4, 5, 2],
-        [0, 1, 2, 3, 5, 3, 1],
-        [2, 0, 4, 4, 1, 2, 4],
-        [2, 5, 5, 3, 2, 0, 1],
-        [4, 3, 3, 2, 1, 0, 1]
-    ]
-    start1 = (1, 2)
-    end1 = (4, 3)
+def modified_manhattan_distance(node, goal):
+    power=1.2
+    return abs(node.position[0] - goal.position[0]) ** power + abs(node.position[1] - goal.position[1]) ** power
 
-    # Test Case 2
-    maze2 = [
-        [1, 3, 2, 5, 1, 4, 3],
-        [2, 1, 3, 1, 3, 2, 5],
-        [3, 0, 5, 0, 1, 2, 2],
-        [5, 3, 2, 1, 5, 0, 3],
-        [2, 4, 1, 0, 0, 2, 0],
-        [4, 0, 2, 1, 5, 3, 4],
-        [1, 5, 1, 0, 2, 4, 1]
-    ]
-    start2 = (3, 6)
-    end2 = (5, 1)
 
-    # Test Case 3
-    maze3 = [
-        [2, 0, 2, 0, 2, 0, 0, 2, 2, 0],
-        [1, 2, 3, 5, 2, 1, 2, 5, 1, 2],
-        [2, 0, 2, 2, 1, 2, 1, 2, 4, 2],
-        [2, 0, 1, 0, 1, 1, 1, 0, 0, 1],
-        [1, 1, 0, 0, 5, 0, 3, 2, 2, 2],
-        [2, 2, 2, 2, 1, 0, 1, 2, 1, 0],
-        [1, 0, 2, 1, 3, 1, 4, 3, 0, 1],
-        [2, 0, 5, 1, 5, 2, 1, 2, 4, 1],
-        [1, 2, 2, 2, 0, 2, 0, 1, 1, 0],
-        [5, 1, 2, 1, 1, 1, 2, 0, 1, 2]
-    ]
-    start3 = (8, 8)
-    end3 = (1, 2)
+def modified_manhattan_distance2(node, goal, maze):
+    # Created a heirustic to consider the number of obstacles between points
+    distance = manhattan_distance(node,goal)
 
-    # Test Case 4
-    maze4 = [
-        [1, 3, 2, 1, 4],
-        [2, 0, 3, 5, 1],
-        [3, 2, 1, 0, 2],
-        [4, 1, 2, 3, 4],
-        [1, 5, 3, 2, 1]
-    ]
-    start4 = (0, 0)
-    end4 = (4, 4)
+    min_row = min(node.position[0], goal.position[0])
+    max_row = max(node.position[0], goal.position[0])
+    min_col = min(node.position[1], goal.position[1])
+    max_col = max(node.position[1], goal.position[1])
 
-    # Test Case 5
-    maze5 = [
-        [1, 0, 2, 1, 4],
-        [0, 0, 3, 5, 1],
-        [3, 2, 1, 0, 2],
-        [4, 1, 2, 3, 4],
-        [1, 5, 3, 2, 1]
-    ]
-    start5 = (0, 0)
-    end5 = (4, 4)
+    obstacles = 0
+    for i in range(min_row, max_row + 1):
+        for j in range(min_col, max_col + 1):
+            if maze[i][j] == 0:
+                obstacles += 1
+    obstacle_penalty = 1.5
+    distance_with_obstacles = distance + (obstacles * obstacle_penalty)
+    return distance_with_obstacles
 
-    # Test Case 6
-    maze6 = [
-        [1, 1, 1, 0, 4],
-        [0, 0, 1, 0, 1],
-        [3, 2, 1, 0, 2],
-        [4, 0, 0, 3, 4],
-        [1, 5, 3, 2, 1]
-    ]
-    start6 = (0, 0)
-    end6 = (4, 4)
 
-    print("\nMaze 1")
-    path = astar(maze1, start1, end1, DEBUG=False)
-    print("\nMaze 2")
-    path = astar(maze2, start2, end2, DEBUG=False)
-    print("\nMaze 3")
-    path = astar(maze3, start3, end3, DEBUG=False)
-    print("\nMaze 4")
-    path = astar(maze4, start4, end4, DEBUG=False)
-    print("\nMaze 5")
-    path = astar(maze5, start5, end5, DEBUG=False)
-    print("\nMaze 6")
-    path = astar(maze6, start6, end6, DEBUG=False)
+def main(test_case_number, heuristic_fucntion):
 
+    test_cases = {
+    1: [[
+            [2, 4, 2, 1, 4, 5, 2],
+            [0, 1, 2, 3, 5, 3, 1],
+            [2, 0, 4, 4, 1, 2, 4],
+            [2, 5, 5, 3, 2, 0, 1],
+            [4, 3, 3, 2, 1, 0, 1]
+        ], (1,2), (4,3)],
+    2: [[
+            [1, 3, 2, 5, 1, 4, 3],
+            [2, 1, 3, 1, 3, 2, 5],
+            [3, 0, 5, 0, 1, 2, 2],
+            [5, 3, 2, 1, 5, 0, 3],
+            [2, 4, 1, 0, 0, 2, 0],
+            [4, 0, 2, 1, 5, 3, 4],
+            [1, 5, 1, 0, 2, 4, 1]
+        ], (3,6), (5,1)],
+    3: [[
+            [2, 0, 2, 0, 2, 0, 0, 2, 2, 0],
+            [1, 2, 3, 5, 2, 1, 2, 5, 1, 2],
+            [2, 0, 2, 2, 1, 2, 1, 2, 4, 2],
+            [2, 0, 1, 0, 1, 1, 1, 0, 0, 1],
+            [1, 1, 0, 0, 5, 0, 3, 2, 2, 2],
+            [2, 2, 2, 2, 1, 0, 1, 2, 1, 0],
+            [1, 0, 2, 1, 3, 1, 4, 3, 0, 1],
+            [2, 0, 5, 1, 5, 2, 1, 2, 4, 1],
+            [1, 2, 2, 2, 0, 2, 0, 1, 1, 0],
+            [5, 1, 2, 1, 1, 1, 2, 0, 1, 2]
+        ], (1,2), (8,8)],
+    4: [[
+            [1, 3, 2, 1, 4],
+            [2, 0, 3, 5, 1],
+            [3, 2, 1, 0, 2],
+            [4, 1, 2, 3, 4],
+            [1, 5, 3, 2, 1]
+        ], (0,0), (4,4)],
+    5: [[
+            [1, 0, 2, 1, 4],
+            [0, 0, 3, 5, 1],
+            [3, 2, 1, 0, 2],
+            [4, 1, 2, 3, 4],
+            [1, 5, 3, 2, 1]
+        ], (0,0), (4,4)],
+    6: [[
+            [1, 1, 1, 0, 4],
+            [0, 0, 1, 0, 1],
+            [3, 2, 1, 0, 2],
+            [4, 0, 0, 3, 4],
+            [1, 5, 3, 2, 1]
+        ], (0,0), (4,4)]
+    }   
+
+    heuristic_fucntions = {
+        1: manhattan_distance,
+        2: all_zeros,
+        3: manhattan_distance_error,
+        4: modified_manhattan_distance,
+        5: modified_manhattan_distance2
+
+    }
+
+    astar(test_cases[test_case_number][0], test_cases[test_case_number][1], test_cases[test_case_number][2], heuristic_fucntions[heuristic_fucntion], DEBUG=False)
 
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            choice = int(input("Select a test case (1 - 6) or 7 to print all test cases with both heuristics: "))
+            
+            if 1 <= choice <= 7:
+                break
+            else:
+                print("Not a valid value. Please enter a number between 1 and 7.")
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+
+    if choice == 7:
+        for test_case in range(1, 7):  
+            for heuristic in [1,2,3,4,5]:   
+                main(test_case, heuristic)
+                print(heuristic)
+                print("\n")
+
+    else:
+        while True:
+            try:
+                heuristic_function = input("Enter heuristic function (1 for manhattan_distance, 2 for all_zeros, 3 for manhattan_distance_error): ")
+
+                if 1 <= heuristic_function <= 3:
+                    main(choice, heuristic_function)
+                    break
+                else:
+                    print("Not a valid heuristic function. Please enter 1 or 2.")
+            except ValueError:
+                print("Invalid input. Please enter 1 or 2.")
